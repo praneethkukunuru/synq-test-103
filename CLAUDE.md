@@ -11,6 +11,12 @@ pls
 > You must act according to the specialized roles defined in the `.claude/rules/` directory when performing tasks. 
 > Whether you are planning, implementing, or testing, read the exact policy and constraints for that role in `.claude/rules/<role>.md`.
 
+
+
+
+
+
+
 this is a 
 test
 to sere
