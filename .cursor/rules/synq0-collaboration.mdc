@@ -1,0 +1,174 @@
+---
+description: "Synq0 collaboration rules for agent coordination and conflict prevention"
+alwaysApply: true
+---
+
+# Synq0 Collaboration Rules for AI Agents
+
+## MANDATORY: Before Making Code Changes
+
+BEFORE editing ANY file, you MUST:
+
+1. **Call `check_lines_conflict`** for the file and exact line range you're about to edit
+   - This prevents merge conflicts and coordinates work with teammates
+   - Returns detailed conflict information including teammate info, their tasks, and optional content preview
+   - If conflicts exist, you MUST handle them properly (see Conflict Resolution below)
+   - Do NOT proceed with edits if conflicts are detected without resolving them
+
+2. **Call `get_file_context`** to see what teammates are currently working on
+   - Use this to understand the collaboration context before starting work
+   - Check for the specific file you're about to edit
+   - Optionally filter by line range to focus on specific areas
+   - Use excludeClientId to exclude your own regions
+
+3. **Call `send_agent_message`** to announce your intent before making significant changes
+   - Use messageType="intent" to describe your task
+   - Include filePath and lineRange if relevant
+
+4. **Call `get_agent_messages`** to check for messages from other agents
+   - Poll regularly to stay updated on teammate activity and questions
+   - Respond to relevant messages
+
+## Conflict Resolution Workflow
+
+When `check_lines_conflict` detects conflicts, you MUST:
+
+1. **Review the conflict details** - The response includes:
+   - Which teammates are working on overlapping lines
+   - Their claimed tasks (what they're working on)
+   - Their GitHub usernames
+   - Optional content preview (if includeContent=true)
+
+2. **Get full context** - For each conflicting teammate:
+   - Call `get_teammate_changes` to see their actual code content
+   - Review their tasks using `get_task` to understand their goal
+   - This gives you complete context about what they're doing and why
+
+3. **Decide on integration strategy**:
+   - **Option A: Adopt their changes** - If their work is better or more complete:
+     - Call `adopt_teammate_changes` to apply their code to your file
+     - Then build on top of their work
+   - **Option B: Preview and merge** - If you want to see a diff first:
+     - Call `preview_teammate_changes` to see side-by-side comparison
+     - Then decide whether to adopt or work around their changes
+   - **Option C: Coordinate** - If both changes are needed:
+     - Call `send_agent_message` to coordinate with the teammate
+     - Work together to create a combined solution
+
+4. **Build on their work** - After adopting changes:
+   - Review what they did and understand their approach
+   - Integrate your changes with theirs
+   - Create a better, more complete solution that combines both agents' work
+
+## When Starting a New Task
+
+When beginning any coding task:
+
+1. First call `get_agent_messages` to see recent agent activity
+2. Then call `get_file_context` to see teammate activity for files you'll be editing
+3. Review what files/areas teammates are working on
+4. Before editing each file, call `check_lines_conflict` for that specific file and line range
+5. If conflicts exist, follow the Conflict Resolution Workflow above
+6. Only proceed with edits after resolving conflicts
+7. Announce your intent using `send_agent_message`
+
+## Tool Usage Guidelines
+
+### Conflict Prevention Tools
+
+- **`check_lines_conflict`**: Use this EVERY TIME before editing code
+  - Required parameters: authorTag, repoName, branch, filePath, startLine, endLine
+  - Optional: excludeClientId (your clientId), includeContent (true to get content preview)
+  - Returns: conflict status, overlapping ranges, teammate info, their tasks, optional content
+  - Extract parameters from the current workspace context
+  - Always check before making changes
+
+- **`get_file_context`**: Use this to understand team context
+  - Call at the start of tasks to see what teammates are working on
+  - Required: authorTag, repoName, branch, filePath
+  - Optional: startLine, endLine (to filter by range), excludeClientId (to exclude your regions)
+  - Returns: all active edit regions for the file
+  - Use to coordinate and avoid duplicate work
+
+### Conflict Resolution Tools
+
+- **`get_teammate_changes`**: Get the actual code content from a teammate
+  - Use this AFTER `check_lines_conflict` identifies a conflict
+  - Required: authorTag, repoName, branch, filePath, clientId (teammate's ID), startLine, endLine
+  - Returns: teammate's current content, baseline content, authorship information
+  - This gives you the exact code they wrote so you can understand and integrate it
+
+- **`preview_teammate_changes`**: Preview teammate's changes in VS Code diff view
+  - Use this to see a side-by-side comparison before adopting
+  - Required: authorTag, repoName, branch, filePath, clientId, startLine, endLine, targetClientId (your clientId)
+  - Opens a visual diff showing baseline, teammate's version, and your current version
+  - Helps you decide whether to adopt or work around their changes
+
+- **`adopt_teammate_changes`**: Apply teammate's changes to your local file
+  - Use this to integrate their work into your codebase
+  - Required: authorTag, repoName, branch, filePath, clientId, startLine, endLine, targetClientId (your clientId)
+  - Replaces your code with the teammate's version for the specified range
+  - Then you can build on top of their work
+
+### Communication Tools
+
+- **`send_agent_message`**: Use this to communicate with other AI agents
+  - Announce your intent before starting significant work
+  - Ask questions if you need clarification
+  - Warn other agents before making breaking changes
+  - Coordinate work division when multiple agents are active
+  - Message types: "intent", "question", "coordination", "warning", "status"
+
+- **`get_agent_messages`**: Check for messages from other agents
+  - Call this regularly (every 30-60 seconds) or when starting new tasks
+  - Use sinceTimestamp to get only new messages
+  - Respond to questions and coordinate based on other agents' intents
+
+### Task Management Tools
+
+- **`get_tasks`**: Get all tasks for the team
+  - Use to see what work is available or in progress
+  - Filter by status, priority, or claimedBy
+
+- **`get_task`**: Get detailed information about a specific task
+  - Use to understand what a teammate is working on when resolving conflicts
+  - Returns full task with subtasks, file ranges, and status
+
+- **`claim_task`**: Claim a task so others know you're working on it
+  - Always claim tasks before starting work
+  - Prevents other agents from working on the same task
+
+## Complete Conflict Resolution Example
+
+1. User asks: "Edit src/auth.ts lines 42-58"
+2. You MUST:
+   - Call `get_agent_messages` to see recent agent activity
+   - Call `get_file_context` with filePath="src/auth.ts" to see teammate activity
+   - Call `send_agent_message` with messageType="intent" to announce what you're about to do
+   - Call `check_lines_conflict` with: authorTag, repoName, branch, filePath="src/auth.ts", startLine=42, endLine=58, includeContent=true
+   
+3. If conflicts exist:
+   - Review the conflicts array - see which teammates are working on overlapping lines
+   - For each conflicting teammate:
+     - Call `get_teammate_changes` to see their actual code
+     - Call `get_task` for each of their tasks to understand their goals
+   - Decide: adopt, preview, or coordinate
+   - If adopting: Call `adopt_teammate_changes` to apply their code
+   - Build on top of their work to create a better solution
+   
+4. If no conflicts:
+   - Proceed with your edit
+   
+5. After completing:
+   - Call `send_agent_message` with messageType="status" to notify completion
+
+## Important Notes
+
+- These tools are MANDATORY, not optional
+- Never skip conflict checking to save time
+- When conflicts exist, ALWAYS review the other agent's work and tasks before proceeding
+- Adopting teammate changes is encouraged - it creates better collaboration
+- Use `get_teammate_changes` to see their exact code, then `adopt_teammate_changes` to integrate it
+- Building on teammate's work creates better solutions than working in isolation
+- Always coordinate through messages when multiple agents are active
+

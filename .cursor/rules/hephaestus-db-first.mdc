@@ -1,0 +1,27 @@
+---
+description: "Hephaestus DB-first retrieval and workflow rule"
+alwaysApply: true
+---
+
+# Hephaestus DB-First Rule
+
+This repository uses Hephaestus as the workflow and memory layer.
+
+## Required Retrieval Order
+
+Before broad code reads or log scans:
+
+1. Use `hephaestus retrieve --slug <slug> --query "<question>" --role <role>`.
+2. If an MCP client is configured, prefer the `hephaestus_retrieve` and `hephaestus_status` tools from `hephaestus mcp-server`.
+3. Only fall back to raw files when the DB evidence bundle is insufficient.
+
+## Required Behavior
+
+- Respect `AGENTS.md`.
+- Treat `.hephaestus/db/hephaestus_memory.sqlite3` as the primary coordination memory.
+- Keep retrieval minimal: start with the narrowest slug/run scope and smallest useful context profile.
+- Prefer token profiles:
+  - `budget` for quick checks
+  - `balanced` for default work
+  - `quality` for deeper review or architecture tasks
+- Persist important discoveries back through Hephaestus workflows rather than inventing ad hoc side channels.
