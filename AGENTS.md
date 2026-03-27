@@ -2,7 +2,7 @@
 
 This is the canonical operating contract for Hephaestus and is intended to be inherited or adapted by target repositories.
 
-## Install Assumptions
+## Install Assumptions -
 
 - Official install/distribution path is the Python CLI package command surface (`hephaestus ...`).
 - Compatibility wrappers (`scripts/install-local.*`, `scripts/bootstrap-target-repo.sh`) remain temporarily and must delegate to CLI with deprecation notice.
