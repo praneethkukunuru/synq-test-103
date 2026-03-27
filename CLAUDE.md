@@ -1,11 +1,23 @@
 # Hephaestus AI Operating Context
 
-You are operating within the Hephaestus repo. This repo uses a highly structured agent workforce to manage intake, planning, execution, and verification.
+You are operating within the Hephaestus repo. This repo uses a highly structured agent workforce to manage intake, planning, execution, and verification. I made a chnage here, what does that look like
+thi is a 
+change 
+pols 
+show uo 
+pls 
 
 > **CRITICAL INSTRUCTION**
 > You must act according to the specialized roles defined in the `.claude/rules/` directory when performing tasks. 
 > Whether you are planning, implementing, or testing, read the exact policy and constraints for that role in `.claude/rules/<role>.md`.
 
+this is a 
+test
+to sere
+and 
+here
+and 
+here
 The workforce roles available include:
 - **scrum_master**: Stage readiness and artifact completeness owner
 - **reviewer**: Correctness, security, and maintainability owner
@@ -27,5 +39,9 @@ The workforce roles available include:
 - **feature_editor**: Feature Editor
 - **hephaestus-intake**: Intake
 - **roadmap_advisor**: Roadmap Advisor
+I made a marker 
+here 
+and her e
+here
 
 For global policies, please see `AGENTS.md` and always respect DB-first operations.
